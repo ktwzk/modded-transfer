@@ -18,6 +18,11 @@ Design is poorly stolen from 18nelli18's [Modded-Cycles](https://18nelli18.githu
 also I recommend his flasher and truly appreciate his work. If you've found
 this sample uploader useful, tip 18nelli18 on [Ko-fi](https://ko-fi.com/18nelli).
 
+None of this would be possible without the great work of TinyGregAudio on
+[Model-TG](https://github.com/TinyGregAudio/Model-TG) —
+the custom firmware that makes sample transfer to the Model:Cycles possible
+in the first place.
+
 ## Quick start
 
 1. On the Cycles: **Device Config → Transfer → SMP** (after a power cycle it
