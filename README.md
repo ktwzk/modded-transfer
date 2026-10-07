@@ -50,6 +50,9 @@ iPad/iPhone).
   Connect, Probe; it marks the crashing format dead and uses the other one.
 - "Not 48kHz mono" on the device for an uploaded sample — open an issue;
   the page may need a byte-order flip (`WIRE_LE` in `js/core.js`).
+- Deleting a sample sometimes doesn't work — that's the device, not the
+  page: it doesn't work in the official transfer app either. Just reboot
+  the device and then you can delete.
 
 ## License
 

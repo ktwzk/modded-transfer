@@ -178,6 +178,9 @@ was deliberately skipped — it works, don't touch).
    stability over a long session.
 
 ## Known limitations / future work
+- Deleting a sample sometimes fails on the device — reproducible in the
+  official transfer app too, so it's a device quirk, not our bug. Reboot
+  the device, then delete works. Documented in README Troubleshooting.
 - Speed: 0x2000 blocks + 20 ms pause. Speed up carefully — the bridge is
   fragile. Keep `deleteRecursive` sequential for the same reason.
 - Fragmented MP4 (`moof`, no sample tables) can't be demuxed — clean error,
