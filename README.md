@@ -1,22 +1,22 @@
 # ModdedTransfer
 
 I had a problem: I needed to upload samples to my modded Model:Cycles from
-my iPad via USB cable, and there was no tool for that — so this page is my
+my iPad via a USB cable, and there was no tool for that — so this page is my
 workaround for it.
 
 For this to work you'll need [Web MIDI Browser](https://apps.apple.com/us/app/web-midi-browser/id953846217)
 by that guy — Takashi Mizuhiki ([mizuhiki/WebMIDIAPIShimForiOS](https://github.com/mizuhiki/WebMIDIAPIShimForiOS)).
 Open this page in his app, plug the iPad into the Cycles, upload.
 
-Honest disclaimer: it's pure AI slop, no code is written by human. It's
-tested with Modded-Cycles 1.21 on my Model:Cycles and iPad mini 6th though.
+Honest disclaimer: it's pure AI slop, no code was written by a human. It's
+tested with Modded-Cycles 1.21 on my Model:Cycles and iPad mini 6 though.
 
-I recommend to only use it in Web MIDI Browser, but probably it'll work
+I recommend only using it in Web MIDI Browser, but it'll probably work
 somewhere else — any browser with Web MIDI should do.
 
 Design is poorly stolen from [Modded-Cycles](https://18nelli18.github.io/Modded-Cycles/) —
 also I recommend his flasher and truly appreciate his work. If you've found
-this sample uploader useful, tip to [18nelli18's Ko-Fi](https://ko-fi.com/18nelli).
+this sample uploader useful, tip 18nelli18 on [Ko-fi](https://ko-fi.com/18nelli).
 
 ## Quick start
 
@@ -43,8 +43,8 @@ iPad/iPhone).
   Browser app's Device Config.
 - The app closes on send — that's the native bridge, not the page: reopen,
   Connect, Probe; it marks the crashing format dead and uses the other one.
-- "Not 48kHz mono" on the device for an uploaded sample — tell me; the page
-  may need a byte-order flip (`WIRE_LE` in `js/core.js`).
+- "Not 48kHz mono" on the device for an uploaded sample — open an issue;
+  the page may need a byte-order flip (`WIRE_LE` in `js/core.js`).
 
 ## License
 
