@@ -68,6 +68,6 @@ if(lsGet("mt.warmup")==="0"){ $("#opt-warmup").checked=false; }
 if(lsGet("mt.verify")==="0"){ state.verify=false; $("#opt-verify").checked=false; }
 if(lsGet("mt.normalize")==="1"){ state.normalize=true; $("#opt-normalize").checked=true; }
 setControls();
+  rep("session start · ModdedTransfer v24 · "+(navigator.userAgent||"n/a"));
 
-rep("session start · ModdedTransfer v23 · "+(navigator.userAgent||"n/a"));
-rlogNow("PAGE MT23 LOADED · "+location.pathname);
+  rlogNow("PAGE MT24 LOADED · "+location.pathname);

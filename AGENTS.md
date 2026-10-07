@@ -118,7 +118,7 @@ survives as a comment. Nothing in the app phones home — verify with
 that step), `mt.probe.ok.*`, `mt.sendfmt`, `mt.transport`, `mt.deadfmt.arr`,
 `mt.deadfmt.u8`, `mt.warmup`, `mt.verify`, `mt.normalize`, `mt.theme`.
 
-## Code structure (v23: `index.html` + `css/` + `js/`)
+## Code structure (v24: `index.html` + `css/` + `js/`)
 `index.html` — markup only (+ tiny theme-init inline script, `mt.theme` with
 `tg.theme` fallback for v19 users).
 `css/site.css` — page chrome (tokens, base, header, hero, footer);
@@ -226,3 +226,9 @@ was deliberately skipped — it works, don't touch).
   (`#drop`/`#vdrop`, `#pick`/`#pickv`/`#videos`, UA switch, section drop
   hook, dead `.drop`/`.well` CSS) — one `#pickfile` button everywhere,
   window stray-drop guards kept
+- v24: fixed `readPlane()` in `js/video.js` — interleaved decoder output
+  (`f32`/`s16`/`u8` non-planar) was sliced as contiguous channel blocks
+  (plus a bytes-vs-elements size mixup), so video audio uploaded
+  chopped/garbled while plain audio files (never pass through here) were
+  fine; now de-interleaves with stride `i*c+p`, verified by a Node mock-
+  AudioData test (8 formats × stereo + mono)

@@ -254,28 +254,41 @@ function sampleReader(file,samples,windowBytes){
     return new Uint8Array(buf,a-winStart,s.size);
   };
 }
-// One AudioData plane as Float32, whatever the decoder's native format is.
+// One AudioData channel as Float32, whatever the decoder's native format is.
+// Non-planar formats ("f32"/"s16"/"u8") are INTERLEAVED — channel p is every
+// c-th sample starting at p — not a contiguous block. (The old code sliced
+// contiguous halves, which is why video audio came out chopped/garbled while
+// plain audio files, which never pass through here, were fine.)
 function readPlane(ad,p){
-  const desc={planeIndex:p,format:"f32-planar"};
-  try{ const t=new Float32Array(ad.allocationSize(desc)); ad.copyTo(t,desc); return t; }
-  catch(_){}
-  const c=ad.numberOfChannels, n=ad.numberOfFrames;
-  const sz=ad.allocationSize({planeIndex:0});
-  const fmt=ad.format||"f32";
-  let plane;
-  if(fmt==="f32"){
-    const all=new Float32Array(sz); ad.copyTo(all,{planeIndex:0});
-    plane=c===1?all:all.subarray(p*n,(p+1)*n);
+  const c=ad.numberOfChannels, n=ad.numberOfFrames, fmt=ad.format||"";
+  try{
+    const t=new Float32Array(n);
+    ad.copyTo(t,{planeIndex:p,format:"f32-planar"});
+    return t;
+  }catch(_){}
+  const planar=fmt.indexOf("planar")!==-1;
+  const plane=planar?p:0;
+  const len=n*(planar?1:c);
+  const out=new Float32Array(n);
+  let i;
+  if(fmt.indexOf("f32")===0){
+    const all=new Float32Array(len); ad.copyTo(all,{planeIndex:plane});
+    if(planar) out.set(all);
+    else for(i=0;i<n;i++) out[i]=all[i*c+p];
   }else if(fmt.indexOf("u8")===0){
-    const all=new Uint8Array(sz); ad.copyTo(all,{planeIndex:0});
-    plane=new Float32Array(c===1?sz:sz/c);
-    for(let i=0;i<plane.length;i++) plane[i]=(all[c===1?i:(p*n+i)*c]-128)/128;
-  }else{
-    const all=new Int16Array(sz/2); ad.copyTo(all,{planeIndex:0});
-    plane=c===1?new Float32Array(all):new Float32Array(n);
-    for(let i=0;i<plane.length;i++) plane[i]=(c===1?all[i]:all[p*n+i])/32768;
+    const all=new Uint8Array(len); ad.copyTo(all,{planeIndex:plane});
+    if(planar) for(i=0;i<n;i++) out[i]=(all[i]-128)/128;
+    else for(i=0;i<n;i++) out[i]=(all[i*c+p]-128)/128;
+  }else if(fmt.indexOf("s32")===0){
+    const all=new Int32Array(len); ad.copyTo(all,{planeIndex:plane});
+    if(planar) for(i=0;i<n;i++) out[i]=all[i]/2147483648;
+    else for(i=0;i<n;i++) out[i]=all[i*c+p]/2147483648;
+  }else{ // s16 and anything else integer-ish
+    const all=new Int16Array(len); ad.copyTo(all,{planeIndex:plane});
+    if(planar) for(i=0;i<n;i++) out[i]=all[i]/32768;
+    else for(i=0;i<n;i++) out[i]=all[i*c+p]/32768;
   }
-  return plane;
+  return out;
 }
 function makeAudioBuffer(channels,frames,rate){
   const n=Math.max(1,frames);
