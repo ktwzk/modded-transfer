@@ -26,6 +26,11 @@ if(!window.__MODDED_TRANSFER) throw new Error("js/core.js must load before js/ma
  $("#opt-normalize").addEventListener("change",()=>{
   state.normalize=$("#opt-normalize").checked;
   lsSet("mt.normalize", state.normalize?"1":"0");
+  // Master switch: applies to every queued sample at once (and stays the
+  // default for files added later); per-sample NORM buttons can still
+  // override individual rows afterwards.
+  for(let i=0;i<state.files.length;i++) state.files[i]._norm=state.normalize;
+  renderQueue();
 });
  $("#copyrep").onclick=copyReport;
 // One picker button everywhere — no drop zones (drag & drop lives in the
@@ -68,6 +73,6 @@ if(lsGet("mt.warmup")==="0"){ $("#opt-warmup").checked=false; }
 if(lsGet("mt.verify")==="0"){ state.verify=false; $("#opt-verify").checked=false; }
 if(lsGet("mt.normalize")==="1"){ state.normalize=true; $("#opt-normalize").checked=true; }
 setControls();
-  rep("session start · ModdedTransfer v24 · "+(navigator.userAgent||"n/a"));
+  rep("session start · ModdedTransfer v25 · "+(navigator.userAgent||"n/a"));
 
-  rlogNow("PAGE MT24 LOADED · "+location.pathname);
+  rlogNow("PAGE MT25 LOADED · "+location.pathname);

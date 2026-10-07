@@ -28,14 +28,16 @@ async function upload(file,index,totalFiles){
 
   setFileState(index,"converting…");
   const t0=Date.now();
-  const a=await decodeToMono48k(file,p=>{
+  const stereo=!!file._stereo;
+  const normalize=file._norm!==undefined?!!file._norm:state.normalize;
+  const a=await decodeTo48k(file,{stereo,normalize},p=>{
     const bar=$("#file-bar-"+index); if(bar) bar.style.width=Math.round(p*100)+"%";
     if(state.files.length===1) setFileState(index,`reading audio track ${Math.round(p*100)}%`);
   });
-  const header=buildHeader(a.pcm.length);
+  const header=buildHeader(a.pcm.length,stereo);
   const total=header.length+a.pcm.length;
   const full=new Uint8Array(total);full.set(header);full.set(a.pcm,64);
-  log(`Decoded ${file.name}\n${a.video?`audio track via ${a.route}\n`:"decoder: "+a.route+"\n"}source: ${a.srcRate} Hz, ${a.srcChannels} ch → 48000 Hz, 1 ch, ${a.frames} frames\n${a.normGain&&a.normGain!==1?`normalized ×${a.normGain.toFixed(2)}\n`:""}PCM: ${a.pcm.length} bytes (16-bit ${WIRE_LE?"LE":"BE"}), file total with header: ${total} bytes\nheader: ${[...header.slice(0,24)].map(hex).join(" ")}`);
+  log(`Decoded ${file.name}\n${a.video?`audio track via ${a.route}\n`:"decoder: "+a.route+"\n"}source: ${a.srcRate} Hz, ${a.srcChannels} ch → 48000 Hz, ${a.channels} ch${stereo?" stereo":""}, ${a.frames} frames\n${a.normGain&&a.normGain!==1?`normalized ×${a.normGain.toFixed(2)}\n`:""}PCM: ${a.pcm.length} bytes (16-bit ${WIRE_LE?"LE":"BE"}), file total with header: ${total} bytes\nheader: ${[...header.slice(0,24)].map(hex).join(" ")}`);
 
   const open=makeMsg(SAMPLE_OPEN,[...u32be(total),...encodePath(path),0]);
   setFileState(index,"opening…");
@@ -102,7 +104,9 @@ async function uploadAll(){
     $("#bar").style.width="0%";
     state.files.forEach((_,i)=>{ setFileState(i,"waiting…"); const b=$("#file-bar-"+i); if(b) b.style.width="0%"; });
     let done=0;
-    rep(`upload-all start · ${state.files.length} file(s) · verify ${state.verify?"on":"off"} · normalize ${state.normalize?"on":"off"}`);
+    const nN=state.files.filter(f=>f._norm!==undefined?!!f._norm:state.normalize).length;
+    const nS=state.files.filter(f=>!!f._stereo).length;
+    rep(`upload-all start · ${state.files.length} file(s) · verify ${state.verify?"on":"off"} · normalize ${nN}/${state.files.length} · stereo ${nS}/${state.files.length}`);
     try{
       for(let i=0;i<state.files.length;i++){
         try{

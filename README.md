@@ -31,6 +31,8 @@ in the first place.
 2. Open [https://ktwzk.github.io/modded-transfer/](https://ktwzk.github.io/modded-transfer/)
    in Web MIDI Browser, tap **Connect**, pick the output + input ports.
 3. Choose audio, rename each sample (that name is what lands on the device),
+   toggle **NORM** (peak-normalize to 0 dB) and **STEREO** per sample if
+   wanted (stereo costs 2× device memory), then
    tap **Upload**.
 4. If the app ever closes the moment you send something: reopen, Connect,
    run **Probe** — it retests the send path and remembers what crashed.
@@ -38,9 +40,10 @@ in the first place.
 ## Supported formats
 
 WAV · MP3 · M4A · AAC · OGG · AIFF · FLAC · MP4 · MOV. Everything is
-converted on the page to 48 kHz mono 16-bit; MP4/MOV contribute only their
-audio track (there is a separate picker that opens Apple Photos on
-iPad/iPhone).
+converted on the page to 48 kHz 16-bit — mono by default, stereo per sample
+if you flip its STEREO button (the device splits L/R itself); MP4/MOV
+contribute only their audio track (there is a separate picker that opens
+Apple Photos on iPad/iPhone).
 
 ## Troubleshooting
 

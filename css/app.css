@@ -100,6 +100,11 @@ select{appearance:none;-webkit-appearance:none;padding-right:30px;
 /* per-file upload progress */
 .ptrack{height:4px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}
 .pfill{height:100%;width:0;background:var(--red)}
+/* per-sample flags: full-width row under the name, small ghost buttons that
+ * light up red when on (like a lit trig key). */
+.ftoggles{grid-column:1/-1;display:flex;gap:8px}
+.tog{background:none;box-shadow:inset 0 0 0 1px var(--line-2);color:var(--ink-2);padding:7px 11px;font-size:12.5px;font-weight:600}
+.tog.on{background:var(--red);color:#1c1c1b;box-shadow:none}
 .transfer-actions{display:flex;gap:12px;align-items:center;margin-top:14px}
 .transfer-actions button{min-width:140px}
 .progress{flex:1;min-width:70px;height:8px;background:var(--well);border:1px solid var(--line-2);border-radius:99px;overflow:hidden}

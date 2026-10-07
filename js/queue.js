@@ -20,6 +20,7 @@ function setControls(){
   $("#go").disabled=!(state.output&&!state.busy);
   $("#ls").disabled=!(state.output&&!state.busy);
   $("#pickfile").disabled=state.busy;
+  try{ const ts=document.querySelectorAll("#queue .tog"); for(let k=0;k<ts.length;k++) ts[k].disabled=state.busy; }catch(_){}
   // Flasher-style step markers: a step's trig key lights up once it is done.
   try{
     const m=document.querySelector("#step-midi"); if(m) m.classList.toggle("done",!!state.output);
@@ -61,7 +62,8 @@ function targetNameFor(f){
   const c=sanitizeTarget(t||(f&&f.name)||"");
   return c||"sample";
 }
-// Audio files and videos share one queue: both end up as a 48 kHz mono sample.
+// Audio files and videos share one queue: both end up as a 48 kHz 16-bit
+// sample, mono or stereo per the sample's own flag.
 // MP4/MOV picked through the *file* input take the exact same video path as
 // the Apple Photos button (isVideoFile → decodeVideoTrack): demux + WebCodecs,
 // decodeAudioData over the whole file, real-time capture as a last resort.
@@ -72,7 +74,9 @@ function setFiles(list){
   for(const f of arr){ (isMediaFile(f)?good:bad).push(f); }
   for(const f of good){
     const dup=state.files.some(x=>x.name===f.name&&x.size===f.size);
-    if(!dup){ f._target=cleanName(f.name); state.files.push(f); }
+    // Per-sample flags (File expandos, like _target): normalize inherits the
+    // global default at queue time, stereo starts as mono.
+    if(!dup){ f._target=cleanName(f.name); f._norm=state.normalize; f._stereo=false; state.files.push(f); }
   }
   renderQueue();
   if(good.length) log(`${good.length} file(s) queued for upload — rename below if needed${bad.length?` — ignored ${bad.length} unsupported (${bad.map(f=>f.name).join(", ")})`:""}.`);
@@ -103,11 +107,16 @@ function renderQueue(){
     const video=isVideoFile(f);
     const d=document.createElement("div");d.className="file";
     d.innerHTML=`<div><input class="rename${dupes[i]?" dup":""}" id="file-name-${i}" type="text" maxlength="31" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Sample name on the device"><div class="meta" id="file-meta-${i}">${formatBytes(f.size)} · ${video?"audio track will be extracted":"waiting"}</div><div class="rename-hint">from ${escapeHtml(f.name)}${dupes[i]?" · <b>duplicate name</b>":""}</div><div class="ptrack"><div class="pfill" id="file-bar-${i}"></div></div></div>
+      <div class="ftoggles"><button type="button" class="tog norm${f._norm?" on":""}" title="Peak-normalize this sample to 0 dB">NORM</button><button type="button" class="tog st${f._stereo?" on":""}" title="Upload as stereo — the device splits L/R itself">STEREO</button></div>
       <button class="queue-x" title="Remove from queue" aria-label="Remove from queue">×</button>`;
     const inp=d.querySelector("input");
     inp.value=targetNameFor(f);
     inp.addEventListener("input",()=>{ f._target=inp.value; refreshDupeMarks(); });
     inp.addEventListener("change",()=>{ f._target=sanitizeTarget(inp.value)||cleanName(f.name); inp.value=targetNameFor(f); refreshDupeMarks(); });
+    // Toggles flip the per-sample flag in place — no re-render, focus is untouched.
+    const tN=d.querySelector(".tog.norm"), tS=d.querySelector(".tog.st");
+    tN.onclick=()=>{ f._norm=!f._norm; tN.classList.toggle("on",!!f._norm); };
+    tS.onclick=()=>{ f._stereo=!f._stereo; tS.classList.toggle("on",!!f._stereo); };
     d.querySelector(".queue-x").onclick=()=>{ state.files.splice(i,1); renderQueue(); };
     q.appendChild(d);
   });

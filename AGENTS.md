@@ -6,7 +6,8 @@ as in dagargo/elektroid `src/elektron.c`). Single page: `index.html` + `css/` +
 
 ## Sample format (device-facing)
 
-- `size` = PCM bytes **without** the header; `rate` = 48000; `stereo` = 0.
+- `size` = PCM bytes **without** the header; `rate` = 48000; `stereo` = 0/1
+  per the sample's own flag (mono default).
 - **32-bit fields are big-endian** (`WIRE_LE=false`; elektroid sends `g_htonl`).
   ⚠️ The one unconfirmed format: an uploaded sample has not been played back
   on the device yet (see “Open questions”). If the device says “Not 48kHz mono”
@@ -14,18 +15,26 @@ as in dagargo/elektroid `src/elektron.c`). Single page: `index.html` + `css/` +
   under a new name.
 - PCM is signed 16-bit, byte order = same `WIRE_LE`.
 
-### Audio conversion (`decodeToMono48k`)
+### Audio conversion (`decodeTo48k`)
 decodeAudioData (WAV/MP3/M4A/AAC/OGG/Opus/AIFF/AIFC/CAF/FLAC — everything in
-`AUDIO_RE`) → manual downmix (mean of all channels) → OfflineAudioContext(1,
-frames, 48000) resample → PCM16.
-Peak-normalize to 0.99 when `state.normalize` (Normalize checkbox in step 3,
-persisted `mt.normalize`, default off; gain logged as `normGain`). The same
-converted buffer is uploaded (audition was removed in v23 — the modded Cycles
+`AUDIO_RE`) → channel mapping (mono = mean of all channels; stereo = first
+two channels, mono source duplicated to L/R) → one OfflineAudioContext(1,
+frames, 48000) render per channel → PCM16 (stereo L/R-interleaved).
+Per-sample flags live on File expandos (`_norm`, `_stereo`, like `_target`;
+session-only, not persisted): peak-normalize to 0.99 with one gain over all
+channels when `_norm` (gain logged as `normGain`). `state.normalize`
+(`mt.normalize`, Normalize checkbox in step 3) is the default for newly queued
+files AND a master switch — flipping it sets `_norm` on every queued row
+(`main.js` re-renders). The STEREO header byte (`h[1]=1`, `size=frames*4`)
+relies on the Model-TG firmware's `el_deint` to split L/R into mid/side planes
+itself (confirmed in TinyGregAudio/Model-TG source; costs 2× slot memory).
+The converted buffer is uploaded (audition was removed in v23 — the modded Cycles
 is a USB audio interface, so the iPad routes playback into the box).
 MP4/MOV (via the file input — the same
 `isVideoFile → decodeVideoTrack` path: demux + WebCodecs → whole-file
 decodeAudioData → real-time capture) → audio track only.
-One AudioContext is created per file and closed. No interleaved stereo.
+One AudioContext is created per file and closed. No 5.1-style downmix — stereo
+keeps the source's first two channels as-is.
 
 ### File pickers (one button everywhere, since v23)
 No drop zones — `#pickrow` holds a single `#pickfile` button → `#files`
@@ -118,7 +127,7 @@ survives as a comment. Nothing in the app phones home — verify with
 that step), `mt.probe.ok.*`, `mt.sendfmt`, `mt.transport`, `mt.deadfmt.arr`,
 `mt.deadfmt.u8`, `mt.warmup`, `mt.verify`, `mt.normalize`, `mt.theme`.
 
-## Code structure (v24: `index.html` + `css/` + `js/`)
+## Code structure (v25: `index.html` + `css/` + `js/`)
 `index.html` — markup only (+ tiny theme-init inline script, `mt.theme` with
 `tg.theme` fallback for v19 users).
 `css/site.css` — page chrome (tokens, base, header, hero, footer);
@@ -137,13 +146,15 @@ files):
 makeDir — all device ops wrapped in `withBusy`, delete/mkdir recorded via
 `rep()`) → `queue` (`setControls`,
 media types, rename `_target`/`targetNameFor`/`queueDupes`/`refreshDupeMarks`,
-renderQueue with per-row `.pfill` bar) → `video`
+renderQueue with per-row `.pfill` bar + NORM/STEREO `.tog` buttons (`_norm`/
+`_stereo` expandos, busy-disabled in `setControls`)) → `video`
 (MP4/MOV demuxer, WebCodecs, capture) → `audio`
-(`decodeToMono48k` with peak-normalize when `state.normalize`, returns
-`normGain`; `buildHeader`) → `transfer` (ping, upload with throttled
+(`decodeTo48k` with per-sample `{stereo,normalize}` opts, returns
+`channels` + `normGain`; `buildHeader` takes the stereo flag) → `transfer` (ping, upload with throttled
 progress UI (global `#bar` + per-row `#file-bar-N`), optional post-CLOSE
-verify via `state.verify`, `uploadAll`) → `main` (bindings
-incl. theme toggle, verify/normalize checkboxes, copy-report button, single
+verify via `state.verify`, per-file norm/stereo counts in the `upload-all start`
+report line, `uploadAll`) → `main` (bindings
+incl. theme toggle, verify checkbox, normalize master-switch checkbox, copy-report button, single
 `#pickfile` picker, stray-drop guards, error handlers, init). Top-level executable code lives
 in `main.js` plus the bridge-stub `try` block and `migrateLs()` definition in
 `core.js` (called from `main.js`).
@@ -235,3 +246,11 @@ was deliberately skipped — it works, don't touch).
   chopped/garbled while plain audio files (never pass through here) were
   fine; now de-interleaves with stride `i*c+p`, verified by a Node mock-
   AudioData test (8 formats × stereo + mono)
+- v25: per-sample NORM/STEREO toggles (`.tog` buttons, `_norm`/`_stereo` File
+  expandos, busy-disabled) — `decodeToMono48k` → `decodeTo48k(file,opts)`
+  with a stereo path (first two channels, mono source duplicated, one
+  OfflineAudioContext render per channel, single-gain normalize, L/R-
+  interleaved PCM) + `buildHeader(bytes,stereo)` setting `h[1]`; the global
+  Normalize checkbox is now a master switch (sets all queued rows + stays the
+  default for new files); per-file norm/stereo counts in the `upload-all
+  start` report line
