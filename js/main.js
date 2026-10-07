@@ -1,5 +1,5 @@
 "use strict";
-/* ModdedTransfer — wiring: buttons, drop zones, error reporting, init.
+/* ModdedTransfer — wiring: buttons, file picker, error reporting, init.
  * Loads last; every other js/ file must come before it (see index.html). */
 if(!window.__MODDED_TRANSFER) throw new Error("js/core.js must load before js/main.js");
 
@@ -28,33 +28,11 @@ if(!window.__MODDED_TRANSFER) throw new Error("js/core.js must load before js/ma
   lsSet("mt.normalize", state.normalize?"1":"0");
 });
  $("#copyrep").onclick=copyReport;
-$("#pick").onclick=()=>$("#files").click();
+// One picker button everywhere — no drop zones (drag & drop lives in the
+// official transfer app). iOS shows its own Photo Library / Take Video /
+// Choose Files sheet for the file input.
+$("#pickfile").onclick=()=>$("#files").click();
  $("#files").onchange=e=>{setFiles(e.target.files);e.target.value="";};
- $("#pickv").onclick=()=>$("#videos").click();
- $("#videos").onchange=e=>{setFiles(e.target.files);e.target.value="";};
- $("#pickfile").onclick=()=>$("#files").click();
-
-// File UI depends on the runtime: iOS webviews (WebMIDIBrowser included —
-// its UA carries no brand token) have no file drag & drop, so the two drop
-// wells become one big button (iOS itself offers Photo Library / Take Video
-// / Choose Files for the file input). iOS = iPad/iPhone/iPod in
-// the UA, or iPadOS in desktop mode (Macintosh UA + touch screen).
-// Outside Apple devices there is no Photos to open, so the Photos well is
-// hidden — the plain file input already accepts MP4/MOV everywhere.
-(function(){
-  const ua=String((navigator&&navigator.userAgent)||"");
-  const inWMB=ua.indexOf("WebMIDIBrowser")!==-1;
-  const isIOS=inWMB||/iPad|iPhone|iPod/i.test(ua)||(ua.indexOf("Macintosh")!==-1&&navigator.maxTouchPoints>1);
-  const isApple=isIOS||/Mac/i.test(ua);
-  if(isIOS){
-    $("#drop").hidden=true;
-    $("#vdrop").hidden=true;
-    $("#pickrow").hidden=false;
-  }else if(!isApple){
-    $("#vdrop").hidden=true;
-  }
-  log("UA: "+ua);
-})();
  $("#send").onclick=uploadAll;
  $("#theme").onclick=()=>{
   const now=document.documentElement.getAttribute("data-theme")
@@ -64,17 +42,8 @@ $("#pick").onclick=()=>$("#files").click();
   lsSet("mt.theme",next);
  };
 
-// Drag & drop: both wells live in the same step, so a single set of handlers on
-// the shared step section — one per well would fire setFiles() twice per drop.
-(function(){
-  const sec=$("#step-files"), zones=[$("#drop"),$("#vdrop")];
-  let depth=0;
-  const paintDrag=on=>{ for(const z of zones) z.classList.toggle("drag",on); };
-  sec.addEventListener("dragenter",e=>{e.preventDefault();depth++;paintDrag(true)});
-  sec.addEventListener("dragover",e=>e.preventDefault());
-  sec.addEventListener("dragleave",()=>{depth=Math.max(0,depth-1);if(!depth)paintDrag(false)});
-  sec.addEventListener("drop",e=>{e.preventDefault();depth=0;paintDrag(false);setFiles(e.dataTransfer.files)});
-})();
+// No drop zones — but a stray drop (e.g. a file dragged onto the page by
+// accident) must not navigate away and kill the session.
 window.addEventListener("dragover",e=>e.preventDefault());
 window.addEventListener("drop",e=>e.preventDefault());
 
@@ -100,5 +69,5 @@ if(lsGet("mt.verify")==="0"){ state.verify=false; $("#opt-verify").checked=false
 if(lsGet("mt.normalize")==="1"){ state.normalize=true; $("#opt-normalize").checked=true; }
 setControls();
 
-rep("session start · ModdedTransfer v22 · "+(navigator.userAgent||"n/a"));
-rlogNow("PAGE MT22 LOADED · "+location.pathname);
+rep("session start · ModdedTransfer v23 · "+(navigator.userAgent||"n/a"));
+rlogNow("PAGE MT23 LOADED · "+location.pathname);

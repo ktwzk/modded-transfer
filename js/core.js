@@ -1,5 +1,5 @@
 "use strict";
-/* ModdedTransfer v22 — shared scope root: guard, state, constants, remote
+/* ModdedTransfer v23 — shared scope root: guard, state, constants, remote
  * logging, native bridge stub, status/log helpers, withBusy, dialog.
  * Classic scripts (no modules, so file:// and the Web MIDI Browser webview work),
  * sharing one scope: top-level const/let/function here are visible to the later

@@ -62,8 +62,7 @@ async function decodeToMono48k(file,onProgress){
     }
   }
 
-  // Peak-normalize to just under 0 dB when the option is on — the same buffer
-  // is auditioned and uploaded, so what you hear is what lands on the device.
+  // Peak-normalize to just under 0 dB when the option is on.
   let normGain=1;
   if(state.normalize){
     let peak=0;

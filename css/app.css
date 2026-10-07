@@ -1,5 +1,5 @@
 /* ModdedTransfer — app components: steps, MIDI rows, LCD, explorer,
- * drop zones, queue with rename inputs, transfer bar, in-page dialog.
+ * picker button, queue with rename inputs, transfer bar, in-page dialog.
  * Page chrome (tokens, header, footer) lives in site.css. */
 
 /* steps: a rule, a numbered trig key that lights up once the step is done */
@@ -81,22 +81,13 @@ select{appearance:none;-webkit-appearance:none;padding-right:30px;
 .delete-item:active{background:var(--red);color:#1c1c1b;box-shadow:none}
 .hint{display:block;margin-top:9px;font-size:12px;line-height:1.45;color:var(--muted)}
 
-/* drop zones (flasher .drop; the old .well class keeps working) */
-.well{border:1px dashed var(--line-2);background:var(--well);border-radius:var(--r);padding:22px 14px;text-align:center;color:var(--muted);font-size:13.5px}
-.well.drag{border-color:var(--red);color:var(--ink);background:var(--red);opacity:.92}
-.drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 20px;border:1.5px dashed var(--line-2);border-radius:var(--r);cursor:pointer;text-align:center}
-.drop-ic{flex:none;color:var(--ink-2)}
-.drop-t strong{display:block;font-size:17px;word-break:break-all}
-.drop-t span{font-size:15px;color:var(--muted)}
-.drop:hover,.drop:focus-visible{border-color:var(--ink);background:var(--casing);outline:none}
+/* format note under the picker button */
 .drop-sub{font-size:12px;color:var(--muted);margin-top:10px}
-/* big picker buttons replacing the drop wells inside WebMIDIBrowser (iOS has
- * no file drag & drop); hidden everywhere else via the hidden attribute. */
+/* the single picker button (no drop zones anywhere) */
 .pickrow{display:flex;flex-direction:column;gap:10px}
-.pickrow[hidden]{display:none}
 .pickrow button{justify-content:center;padding:18px;font-size:16px}
 #queue{margin-top:6px}
-.file{display:grid;grid-template-columns:1fr auto auto;gap:6px 10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.file{display:grid;grid-template-columns:1fr auto;gap:6px 10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
 .file:first-child{border-top:0}
 .rename{width:100%;font-family:var(--f-code);font-size:14px;background:var(--paper);border:1px solid var(--line-2);color:var(--ink);padding:9px 10px;border-radius:var(--r)}
 .rename.dup{border-color:var(--bad);color:var(--bad)}
@@ -106,11 +97,7 @@ select{appearance:none;-webkit-appearance:none;padding-right:30px;
 .queue-x{background:none;box-shadow:none;color:var(--muted);font-size:18px;padding:6px;min-width:36px;min-height:36px}
 @media(hover:hover){ .queue-x:hover{background:var(--red);color:#1c1c1b;box-shadow:none} }
 .queue-x:active{box-shadow:none}
-/* per-file audition (play the converted 48 kHz mono) and progress */
-.audition{background:none;box-shadow:none;color:var(--ink-2);font-size:15px;padding:6px;min-width:36px;min-height:36px}
-@media(hover:hover){ .audition:hover:not(:disabled){background:var(--casing);box-shadow:none} }
-.audition:active{box-shadow:none}
-.audition:disabled{opacity:.35}
+/* per-file upload progress */
 .ptrack{height:4px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}
 .pfill{height:100%;width:0;background:var(--red)}
 .transfer-actions{display:flex;gap:12px;align-items:center;margin-top:14px}

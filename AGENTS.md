@@ -20,24 +20,20 @@ decodeAudioData (WAV/MP3/M4A/AAC/OGG/Opus/AIFF/AIFC/CAF/FLAC — everything in
 frames, 48000) resample → PCM16.
 Peak-normalize to 0.99 when `state.normalize` (Normalize checkbox in step 3,
 persisted `mt.normalize`, default off; gain logged as `normGain`). The same
-converted buffer is auditioned and uploaded: first ▶ tap converts and caches
-on the File expando `_conv`, `upload()` reuses it (cache dropped after use).
-MP4/MOV (via the file input and via the Apple Photos button — the same
+converted buffer is uploaded (audition was removed in v23 — the modded Cycles
+is a USB audio interface, so the iPad routes playback into the box).
+MP4/MOV (via the file input — the same
 `isVideoFile → decodeVideoTrack` path: demux + WebCodecs → whole-file
 decodeAudioData → real-time capture) → audio track only.
 One AudioContext is created per file and closed. No interleaved stereo.
 
-### File pickers (UA-dependent, wired in `main.js` init)
-iOS webviews have no file drag & drop, so on iOS the `#drop`/`#vdrop` wells
-are hidden and `#pickrow` shows one big button instead — `#pickfile` →
-`#files` (iOS itself offers Photo Library / Take Video / Choose Files, so no
-separate Photos button is needed). iOS = `WebMIDIBrowser` in the UA (kept
-as a trigger, though the app's UA carries no brand token) or
-`iPad|iPhone|iPod`, or `Macintosh` + touch screen (iPadOS desktop mode).
-Outside Apple devices (`Mac` in the UA, iOS counts as Apple) the Photos well
-`#vdrop` is hidden — the plain file input already accepts MP4/MOV. The new
-buttons are busy-guarded in `setControls()` like `#pick`/`#pickv`. The UA is
-logged once at init (`UA: ...`) for diagnosis.
+### File pickers (one button everywhere, since v23)
+No drop zones — `#pickrow` holds a single `#pickfile` button → `#files`
+(the input accepts audio + video; iOS shows its own Photo Library / Take
+Video / Choose Files sheet). Drag & drop deliberately lives only in the
+official transfer app. The button is busy-guarded in `setControls()`.
+`main.js` keeps window-level dragover/drop `preventDefault()` so a stray
+drop never navigates away mid-session.
 
 ### Rename before upload
 The queue keeps File + expando `_target` (default `cleanName(file.name)`:
@@ -52,8 +48,8 @@ dims (`dim`) while duplicates exist.
 Inherits Modded-Cycles (18nelli18.github.io/Modded-Cycles): tokens and
 Familjen Grotesk (no Tiny5 — there is no LCD drawing in this UI), full-width `.top` header with nav (no hero),
 numbered
-`.step`s (`.num` turns red via `.done` from `setControls()`), `.drop`
-drop-zones, LCD statuses, key-style buttons, footer. `css/site.css` = page
+`.step`s (`.num` turns red via `.done` from `setControls()`),
+LCD statuses, key-style buttons, footer. `css/site.css` = page
 chrome, `css/app.css` = app components; all JS `#id`s unchanged.
 
 ---
@@ -122,11 +118,11 @@ survives as a comment. Nothing in the app phones home — verify with
 that step), `mt.probe.ok.*`, `mt.sendfmt`, `mt.transport`, `mt.deadfmt.arr`,
 `mt.deadfmt.u8`, `mt.warmup`, `mt.verify`, `mt.normalize`, `mt.theme`.
 
-## Code structure (v22: `index.html` + `css/` + `js/`)
+## Code structure (v23: `index.html` + `css/` + `js/`)
 `index.html` — markup only (+ tiny theme-init inline script, `mt.theme` with
 `tg.theme` fallback for v19 users).
 `css/site.css` — page chrome (tokens, base, header, hero, footer);
-`css/app.css` — components (steps, LCD, explorer, drops, queue, dialog).
+`css/app.css` — components (steps, LCD, explorer, picker, queue, dialog).
 `js/` — plain (NOT module) scripts, loaded at the end of body strictly in
 order, sharing one scope (top-level const/let/function visible to later
 files):
@@ -139,17 +135,16 @@ files):
 1/6…6/6 + warm-up + re-entry guard, `selectPort` with busy-guard, probe) →
 `files` (paths/CP1252, readDir/parse, renderExplorer, recursive delete,
 makeDir — all device ops wrapped in `withBusy`, delete/mkdir recorded via
-`rep()`) → `queue` (`setControls` incl. audition busy-guard,
+`rep()`) → `queue` (`setControls`,
 media types, rename `_target`/`targetNameFor`/`queueDupes`/`refreshDupeMarks`,
-renderQueue with ▶ audition button + per-row `.pfill` bar, `toggleAudition`/
-`stopAudition` with `_conv` conversion cache on the File expando) → `video`
+renderQueue with per-row `.pfill` bar) → `video`
 (MP4/MOV demuxer, WebCodecs, capture) → `audio`
 (`decodeToMono48k` with peak-normalize when `state.normalize`, returns
 `normGain`; `buildHeader`) → `transfer` (ping, upload with throttled
 progress UI (global `#bar` + per-row `#file-bar-N`), optional post-CLOSE
-verify via `state.verify`, `_conv` reuse, `uploadAll`) → `main` (bindings
-incl. theme toggle, verify/normalize checkboxes, copy-report button, UA pickrow
-switch, single drop hook on `#step-files`, error handlers, init). Top-level executable code lives
+verify via `state.verify`, `uploadAll`) → `main` (bindings
+incl. theme toggle, verify/normalize checkboxes, copy-report button, single
+`#pickfile` picker, stray-drop guards, error handlers, init). Top-level executable code lives
 in `main.js` plus the bridge-stub `try` block and `migrateLs()` definition in
 `core.js` (called from `main.js`).
 
@@ -223,5 +218,11 @@ was deliberately skipped — it works, don't touch).
   cache reused by upload), per-file progress bars (`.pfill`), session report
   (`state.report`/`rep()` + Copy report button with clipboard fallback);
   remote server logging REMOVED (no-op `rlog`/`rlogNow`, checkbox + `mt.remote`
-  gone — nothing phones home); queue persistence (F3) and on-device rename
-  (F7) deliberately skipped (see review: no rename opcode exists)
+   gone — nothing phones home); queue persistence (F3) and on-device rename
+   (F7) deliberately skipped (see review: no rename opcode exists)
+- v23: audition REMOVED (playback routes into the modded Cycles over USB
+  audio, so prelistening is useless) — ▶ button, `toggleAudition`/
+  `stopAudition`, `_conv` cache, `.audition` CSS gone; drop zones REMOVED
+  (`#drop`/`#vdrop`, `#pick`/`#pickv`/`#videos`, UA switch, section drop
+  hook, dead `.drop`/`.well` CSS) — one `#pickfile` button everywhere,
+  window stray-drop guards kept

@@ -28,13 +28,10 @@ async function upload(file,index,totalFiles){
 
   setFileState(index,"converting…");
   const t0=Date.now();
-  // Audition (queue ▶) converts ahead of time and caches on the File expando —
-  // reuse it here instead of decoding twice.
-  const a=file._conv||await decodeToMono48k(file,p=>{
+  const a=await decodeToMono48k(file,p=>{
     const bar=$("#file-bar-"+index); if(bar) bar.style.width=Math.round(p*100)+"%";
     if(state.files.length===1) setFileState(index,`reading audio track ${Math.round(p*100)}%`);
   });
-  file._conv=null;
   const header=buildHeader(a.pcm.length);
   const total=header.length+a.pcm.length;
   const full=new Uint8Array(total);full.set(header);full.set(a.pcm,64);
@@ -102,7 +99,6 @@ async function uploadAll(){
   const di=Object.keys(dupes);
   if(di.length){ log(`Two files are named “${targetNameFor(state.files[di[0]])}” — rename one first.`,"bad"); return; }
   await withBusy(async()=>{
-    stopAudition();
     $("#bar").style.width="0%";
     state.files.forEach((_,i)=>{ setFileState(i,"waiting…"); const b=$("#file-bar-"+i); if(b) b.style.width="0%"; });
     let done=0;
