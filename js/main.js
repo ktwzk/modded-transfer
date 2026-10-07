@@ -33,11 +33,11 @@ $("#pick").onclick=()=>$("#files").click();
  $("#pickv").onclick=()=>$("#videos").click();
  $("#videos").onchange=e=>{setFiles(e.target.files);e.target.value="";};
  $("#pickfile").onclick=()=>$("#files").click();
- $("#pickphotos").onclick=()=>$("#videos").click();
 
 // File UI depends on the runtime: iOS webviews (WebMIDIBrowser included —
 // its UA carries no brand token) have no file drag & drop, so the two drop
-// wells become two big buttons (file + Photos). iOS = iPad/iPhone/iPod in
+// wells become one big button (iOS itself offers Photo Library / Take Video
+// / Choose Files for the file input). iOS = iPad/iPhone/iPod in
 // the UA, or iPadOS in desktop mode (Macintosh UA + touch screen).
 // Outside Apple devices there is no Photos to open, so the Photos well is
 // hidden — the plain file input already accepts MP4/MOV everywhere.
@@ -49,7 +49,7 @@ $("#pick").onclick=()=>$("#files").click();
   if(isIOS){
     $("#drop").hidden=true;
     $("#vdrop").hidden=true;
-    $("#pickrow").hidden=false; // iOS only, so both buttons (file + Photos) stay
+    $("#pickrow").hidden=false;
   }else if(!isApple){
     $("#vdrop").hidden=true;
   }

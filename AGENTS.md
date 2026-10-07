@@ -29,8 +29,9 @@ One AudioContext is created per file and closed. No interleaved stereo.
 
 ### File pickers (UA-dependent, wired in `main.js` init)
 iOS webviews have no file drag & drop, so on iOS the `#drop`/`#vdrop` wells
-are hidden and `#pickrow` shows two big buttons instead — `#pickfile` →
-`#files`, `#pickphotos` → `#videos`. iOS = `WebMIDIBrowser` in the UA (kept
+are hidden and `#pickrow` shows one big button instead — `#pickfile` →
+`#files` (iOS itself offers Photo Library / Take Video / Choose Files, so no
+separate Photos button is needed). iOS = `WebMIDIBrowser` in the UA (kept
 as a trigger, though the app's UA carries no brand token) or
 `iPad|iPhone|iPod`, or `Macintosh` + touch screen (iPadOS desktop mode).
 Outside Apple devices (`Mac` in the UA, iOS counts as Apple) the Photos well

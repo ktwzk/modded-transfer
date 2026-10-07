@@ -22,7 +22,6 @@ function setControls(){
   $("#pick").disabled=state.busy;
   $("#pickv").disabled=state.busy;
   $("#pickfile").disabled=state.busy;
-  $("#pickphotos").disabled=state.busy;
   if(state.busy) stopAudition();
   const auds=document.querySelectorAll(".audition");
   for(let k=0;k<auds.length;k++) auds[k].disabled=state.busy;
