@@ -14,7 +14,7 @@ tested with Modded-Cycles 1.21 on my Model:Cycles and iPad mini 6 though.
 I recommend only using it in Web MIDI Browser, but it'll probably work
 somewhere else — any browser with Web MIDI should do.
 
-Design is poorly stolen from [Modded-Cycles](https://18nelli18.github.io/Modded-Cycles/) —
+Design is poorly stolen from 18nelli18's [Modded-Cycles](https://18nelli18.github.io/Modded-Cycles/) —
 also I recommend his flasher and truly appreciate his work. If you've found
 this sample uploader useful, tip 18nelli18 on [Ko-fi](https://ko-fi.com/18nelli).
 
