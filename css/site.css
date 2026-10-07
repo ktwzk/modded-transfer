@@ -1,0 +1,84 @@
+/* ModdedTransfer — page chrome, inherited from Modded-Cycles
+ * (18nelli18.github.io/Modded-Cycles: docs/assets/site.css + docs/flasher/style.css).
+ * Design tokens, base elements, header, hero, key-buttons, footer.
+ * App components live in app.css. */
+/* Design tokens borrowed from 18nelli18.github.io/Modded-Cycles — the page wears the
+   colours of the unit: grey casing, charcoal keys, the red of a lit trig, and an LCD. */
+:root{
+  color-scheme:light;
+  --paper:#e3e2de;
+  --casing:#cfcecb;
+  --well:#c5c4c0;
+  --line:#b9b8b3;
+  --line-2:#a3a29d;
+  --ink:#1c1c1b;
+  --ink-2:#383836;
+  --muted:#5b5a56;
+  --ctl:#46474b;
+  --ctl-ink:#e8e7e3;
+  --ctl-edge:#2e2f32;
+  --red:#ec5a36;
+  --red-ink:#a8381a;
+  --lcd:#b2b6e2;
+  --lcd-ink:#1f2457;
+  --lcd-edge:#7f86c4;
+  --ok:#2b6a3b;
+  --warn:#875300;
+  --bad:#a3291b;
+  --f:"Familjen Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  --f-code:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#1b1b1b; --casing:#2b2b2a; --well:#333331; --line:#3b3b39; --line-2:#5c5c59;
+    --ink:#ecebe7; --ink-2:#c8c7c2; --muted:#9b9a95;
+    --ctl:#cfcecb; --ctl-ink:#1c1c1b; --ctl-edge:#7d7c78;
+    --red-ink:#ff8a66; --ok:#71d08c; --warn:#e9b44f; --bad:#ff7b6b;
+    --lcd:#2f3560; --lcd-ink:#c6caf5; --lcd-edge:#5a63a0;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#1b1b1b; --casing:#2b2b2a; --well:#333331; --line:#3b3b39; --line-2:#5c5c59;
+  --ink:#ecebe7; --ink-2:#c8c7c2; --muted:#9b9a95;
+  --ctl:#cfcecb; --ctl-ink:#1c1c1b; --ctl-edge:#7d7c78;
+  --red-ink:#ff8a66; --ok:#71d08c; --warn:#e9b44f; --bad:#ff7b6b;
+  --lcd:#2f3560; --lcd-ink:#c6caf5; --lcd-edge:#5a63a0;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:24px}
+body{
+  margin:0;min-height:100vh;background:var(--paper);color:var(--ink);
+  font:400 16px/1.5 var(--f);-webkit-font-smoothing:antialiased;
+  padding:calc(18px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right))
+          calc(28px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+}
+main{max-width:660px;margin:0 auto}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+main.wrap{max-width:1180px}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+a{color:inherit;text-decoration-thickness:1px;text-underline-offset:.2em;text-decoration-color:var(--line-2)}
+::selection{background:var(--red);color:#1c1c1b}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+.top{display:flex;align-items:baseline;gap:28px;padding-top:22px;flex-wrap:wrap;margin-bottom:18px}
+.brand{font-weight:700;font-size:20px;letter-spacing:-.02em;text-decoration:none;margin-right:auto;line-height:1.1}
+.top nav{display:flex;gap:22px;flex-wrap:wrap;align-items:baseline;font-size:16px}
+.top nav a{text-decoration:none}
+.top nav a:hover{text-decoration:underline;text-decoration-color:var(--red);text-decoration-thickness:2px}
+.theme-btn{display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:var(--r);background:none;color:var(--ink-2);cursor:pointer}
+.theme-btn:hover{color:var(--ink);background:var(--casing)}
+.theme-btn .sun{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .theme-btn .sun{display:block}:root:not([data-theme="light"]) .theme-btn .moon{display:none}}
+:root[data-theme="dark"] .theme-btn .sun{display:block}
+:root[data-theme="dark"] .theme-btn .moon{display:none}
+
+/* buttons shaped like the unit's keys are plain button elements, styled in app.css */
+
+.foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;justify-content:space-between}
+
+@media (max-width:900px){ .wrap{padding:0 18px} }
+@media (max-width:720px){ .wrap{padding:0 18px} }

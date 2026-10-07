@@ -1,0 +1,140 @@
+/* ModdedTransfer — app components: steps, MIDI rows, LCD, explorer,
+ * drop zones, queue with rename inputs, transfer bar, in-page dialog.
+ * Page chrome (tokens, header, footer) lives in site.css. */
+
+/* steps: a rule, a numbered trig key that lights up once the step is done */
+.step{padding:22px 0 34px;border-top:1px solid var(--ink)}
+.step>header{display:flex;align-items:center;gap:14px;margin:0 0 16px}
+.step h2{font-size:24px}
+.num{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:6px;background:var(--ctl);color:var(--ctl-ink);font-weight:700;font-size:15px;box-shadow:0 2px 0 var(--ctl-edge)}
+.step.done .num{background:var(--red);color:#2b1710}
+.step-body{margin:0}
+.note{border:1px solid var(--line);border-left:3px solid var(--line-2);border-radius:var(--r);padding:10px 13px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.note b{color:var(--ink);font-weight:600}
+
+.card{background:var(--casing);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px 16px;margin:14px 0}
+.card-label{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 12px}
+.card-label .count{font-weight:400;letter-spacing:0;text-transform:none;font-family:var(--f-code);font-size:13px}
+
+button,select,input{font:inherit;font-size:14px;border-radius:var(--r)}
+button{
+  display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border:0;
+  background:var(--ctl);color:var(--ctl-ink);font-weight:600;cursor:pointer;
+  box-shadow:0 2px 0 var(--ctl-edge);transition:background .1s,color .1s,box-shadow .1s;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;
+}
+button.ghost{background:none;color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line-2)}
+button.secondary{background:none;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line-2)}
+.modal-actions .primary{background:var(--ctl);color:var(--ctl-ink)}
+.modal-actions .danger{background:var(--bad);color:#fff}
+button.small{padding:7px 11px;font-size:12.5px;font-weight:600}
+button.icon{padding:9px 11px;min-width:42px;justify-content:center}
+button.dim{opacity:.4}
+button:disabled{opacity:.35;cursor:default;box-shadow:none}
+button:active{transform:translateY(1px);box-shadow:0 1px 0 var(--ctl-edge)}
+@media(hover:hover){
+  button:not(:disabled):hover{background:var(--red);color:#1c1c1b}
+  button.ghost:not(:disabled):hover{background:var(--red);color:#1c1c1b}
+}
+select,input{background:var(--well);border:1px solid var(--line-2);color:var(--ink);padding:10px 12px;max-width:100%}
+select{appearance:none;-webkit-appearance:none;padding-right:30px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row.ports{margin-top:10px}
+.row.ports select{flex:1;min-width:150px}
+
+.opts{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.opt{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);user-select:none;cursor:pointer}
+.opt input{accent-color:var(--red);margin:0;width:15px;height:15px}
+
+/* connection rows are plain .row elements (see above) */
+
+/* the unit's screen */
+.lcd{
+  background:var(--lcd);color:var(--lcd-ink);border:1px solid var(--lcd-edge);border-radius:var(--r);
+  font-family:var(--f-code);font-size:13px;line-height:1.42;
+  padding:8px 10px;margin-top:12px;white-space:pre-wrap;word-break:break-word;
+}
+.lcd .ok{color:#14561f} .lcd .bad{color:#7d1a0f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lcd .ok{color:#7de39a}:root:not([data-theme="light"]) .lcd .bad{color:#ff9b8d}}
+:root[data-theme="dark"] .lcd .ok{color:#7de39a}
+:root[data-theme="dark"] .lcd .bad{color:#ff9b8d}
+#status{min-height:3.6em;max-height:13em;overflow:auto}
+#probeinfo{margin-top:10px;font-size:12.5px}
+#probeinfo .okmark{color:var(--ok)}
+#probeinfo .bad{color:var(--bad)}
+
+.explorer-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+#path{flex:1;min-width:130px;font-family:var(--f-code);font-size:13px}
+.explorer-list{background:var(--well);border:1px solid var(--line-2);border-radius:var(--r);padding:0 12px;min-height:110px;max-height:340px;overflow:auto}
+.explorer-item{display:grid;grid-template-columns:22px 1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);min-height:46px}
+.explorer-item:last-child{border-bottom:0}
+.explorer-item.clickable{cursor:pointer}
+@media(hover:hover){ .explorer-item.clickable:hover{background:var(--casing)} }
+.explorer-icon{display:flex;align-items:center;justify-content:center;color:var(--muted)}
+.explorer-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.explorer-size{font-size:12px;color:var(--muted);font-family:var(--f-code)}
+.explorer-empty{padding:22px 6px;color:var(--muted);text-align:center;font-size:13px}
+.delete-item{background:none;box-shadow:none;color:var(--bad);font-size:20px;font-weight:400;padding:0;min-width:40px;min-height:40px;border-radius:var(--r);opacity:.7;box-shadow:none}
+@media(hover:hover){ .delete-item:hover{background:var(--red);color:#1c1c1b;box-shadow:none} }
+.delete-item:active{background:var(--red);color:#1c1c1b;box-shadow:none}
+.hint{display:block;margin-top:9px;font-size:12px;line-height:1.45;color:var(--muted)}
+
+/* drop zones (flasher .drop; the old .well class keeps working) */
+.well{border:1px dashed var(--line-2);background:var(--well);border-radius:var(--r);padding:22px 14px;text-align:center;color:var(--muted);font-size:13.5px}
+.well.drag{border-color:var(--red);color:var(--ink);background:var(--red);opacity:.92}
+.drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 20px;border:1.5px dashed var(--line-2);border-radius:var(--r);cursor:pointer;text-align:center}
+.drop-ic{flex:none;color:var(--ink-2)}
+.drop-t strong{display:block;font-size:17px;word-break:break-all}
+.drop-t span{font-size:15px;color:var(--muted)}
+.drop:hover,.drop:focus-visible{border-color:var(--ink);background:var(--casing);outline:none}
+.drop-sub{font-size:12px;color:var(--muted);margin-top:10px}
+/* big picker buttons replacing the drop wells inside WebMIDIBrowser (iOS has
+ * no file drag & drop); hidden everywhere else via the hidden attribute. */
+.pickrow{display:flex;flex-direction:column;gap:10px}
+.pickrow[hidden]{display:none}
+.pickrow button{justify-content:center;padding:18px;font-size:16px}
+#queue{margin-top:6px}
+.file{display:grid;grid-template-columns:1fr auto auto;gap:6px 10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.file:first-child{border-top:0}
+.rename{width:100%;font-family:var(--f-code);font-size:14px;background:var(--paper);border:1px solid var(--line-2);color:var(--ink);padding:9px 10px;border-radius:var(--r)}
+.rename.dup{border-color:var(--bad);color:var(--bad)}
+.rename-hint{font-size:11.5px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta{color:var(--muted);font-size:12px;margin-top:1px}
+.meta.ok{color:var(--ok)} .meta.bad{color:var(--bad)}
+.queue-x{background:none;box-shadow:none;color:var(--muted);font-size:18px;padding:6px;min-width:36px;min-height:36px}
+@media(hover:hover){ .queue-x:hover{background:var(--red);color:#1c1c1b;box-shadow:none} }
+.queue-x:active{box-shadow:none}
+/* per-file audition (play the converted 48 kHz mono) and progress */
+.audition{background:none;box-shadow:none;color:var(--ink-2);font-size:15px;padding:6px;min-width:36px;min-height:36px}
+@media(hover:hover){ .audition:hover:not(:disabled){background:var(--casing);box-shadow:none} }
+.audition:active{box-shadow:none}
+.audition:disabled{opacity:.35}
+.ptrack{height:4px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}
+.pfill{height:100%;width:0;background:var(--red)}
+.transfer-actions{display:flex;gap:12px;align-items:center;margin-top:14px}
+.transfer-actions button{min-width:140px}
+.progress{flex:1;min-width:70px;height:8px;background:var(--well);border:1px solid var(--line-2);border-radius:99px;overflow:hidden}
+#bar{height:100%;width:0;transition:width .15s;background:var(--red)}
+
+/* ---- in-page dialog (confirm()/prompt() are dead in this app) ---- */
+.modal-ov{
+  position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.45);
+  display:flex;align-items:center;justify-content:center;
+  padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+}
+.modal-box{
+  background:var(--casing);border:1px solid var(--line-2);border-radius:8px;
+  width:100%;max-width:340px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.35);
+}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.modal-msg{font-size:13.5px;color:var(--muted);line-height:1.5;margin-bottom:14px;word-break:break-word}
+.modal-input{width:100%;margin-bottom:14px;font-size:14px;font-family:var(--f-code)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+@media(max-width:520px){
+  body{padding:12px 12px calc(20px + env(safe-area-inset-bottom))}
+  .card{padding:13px 13px 15px}
+  .transfer-actions{flex-wrap:wrap}
+  .transfer-actions button{min-width:0;flex:1}
+}
