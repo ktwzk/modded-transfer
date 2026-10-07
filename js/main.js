@@ -35,21 +35,25 @@ $("#pick").onclick=()=>$("#files").click();
  $("#pickfile").onclick=()=>$("#files").click();
  $("#pickphotos").onclick=()=>$("#videos").click();
 
-// File UI depends on the runtime: WebMIDIBrowser (iOS webview) has no file
-// drag & drop, so the two drop wells become two big buttons (file + Photos).
+// File UI depends on the runtime: iOS webviews (WebMIDIBrowser included —
+// its UA carries no brand token) have no file drag & drop, so the two drop
+// wells become two big buttons (file + Photos). iOS = iPad/iPhone/iPod in
+// the UA, or iPadOS in desktop mode (Macintosh UA + touch screen).
 // Outside Apple devices there is no Photos to open, so the Photos well is
 // hidden — the plain file input already accepts MP4/MOV everywhere.
 (function(){
   const ua=String((navigator&&navigator.userAgent)||"");
   const inWMB=ua.indexOf("WebMIDIBrowser")!==-1;
-  const isApple=inWMB||/iPad|iPhone|iPod|Mac/i.test(ua);
-  if(inWMB){
+  const isIOS=inWMB||/iPad|iPhone|iPod/i.test(ua)||(ua.indexOf("Macintosh")!==-1&&navigator.maxTouchPoints>1);
+  const isApple=isIOS||/Mac/i.test(ua);
+  if(isIOS){
     $("#drop").hidden=true;
     $("#vdrop").hidden=true;
-    $("#pickrow").hidden=false; // WMB only ships on iOS, so both buttons stay
+    $("#pickrow").hidden=false; // iOS only, so both buttons (file + Photos) stay
   }else if(!isApple){
     $("#vdrop").hidden=true;
   }
+  log("UA: "+ua);
 })();
  $("#send").onclick=uploadAll;
  $("#theme").onclick=()=>{

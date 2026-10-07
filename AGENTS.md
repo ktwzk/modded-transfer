@@ -28,12 +28,15 @@ decodeAudioData → real-time capture) → audio track only.
 One AudioContext is created per file and closed. No interleaved stereo.
 
 ### File pickers (UA-dependent, wired in `main.js` init)
-WebMIDIBrowser (UA contains `WebMIDIBrowser`, iOS webview, no drag & drop):
-`#drop`/`#vdrop` are hidden and `#pickrow` shows two big buttons instead —
-`#pickfile` → `#files`, `#pickphotos` → `#videos`. Outside Apple devices
-(`iPad|iPhone|iPod|Mac` in the UA, WMB counts as Apple) the Photos well
+iOS webviews have no file drag & drop, so on iOS the `#drop`/`#vdrop` wells
+are hidden and `#pickrow` shows two big buttons instead — `#pickfile` →
+`#files`, `#pickphotos` → `#videos`. iOS = `WebMIDIBrowser` in the UA (kept
+as a trigger, though the app's UA carries no brand token) or
+`iPad|iPhone|iPod`, or `Macintosh` + touch screen (iPadOS desktop mode).
+Outside Apple devices (`Mac` in the UA, iOS counts as Apple) the Photos well
 `#vdrop` is hidden — the plain file input already accepts MP4/MOV. The new
-buttons are busy-guarded in `setControls()` like `#pick`/`#pickv`.
+buttons are busy-guarded in `setControls()` like `#pick`/`#pickv`. The UA is
+logged once at init (`UA: ...`) for diagnosis.
 
 ### Rename before upload
 The queue keeps File + expando `_target` (default `cleanName(file.name)`:
