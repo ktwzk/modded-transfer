@@ -20,7 +20,15 @@ function setControls(){
   $("#go").disabled=!(state.output&&!state.busy);
   $("#ls").disabled=!(state.output&&!state.busy);
   $("#pickfile").disabled=state.busy;
-  try{ const ts=document.querySelectorAll("#queue .tog"); for(let k=0;k<ts.length;k++) ts[k].disabled=state.busy; }catch(_){}
+  try{
+    // STEREO stays disabled for mono sources even when idle — uploading those
+    // as stereo would burn 2× slot memory on dual mono.
+    const rows=document.querySelectorAll("#queue .file");
+    for(let k=0;k<rows.length&&k<state.files.length;k++){
+      const f=state.files[k], ts=rows[k].querySelectorAll(".tog");
+      for(let j=0;j<ts.length;j++) ts[j].disabled=state.busy||(ts[j].classList.contains("st")&&f._srcCh===1);
+    }
+  }catch(_){}
   // Flasher-style step markers: a step's trig key lights up once it is done.
   try{
     const m=document.querySelector("#step-midi"); if(m) m.classList.toggle("done",!!state.output);
@@ -75,8 +83,9 @@ function setFiles(list){
   for(const f of good){
     const dup=state.files.some(x=>x.name===f.name&&x.size===f.size);
     // Per-sample flags (File expandos, like _target): normalize inherits the
-    // global default at queue time, stereo starts as mono.
-    if(!dup){ f._target=cleanName(f.name); f._norm=state.normalize; f._stereo=false; state.files.push(f); }
+    // global default at queue time, stereo defaults to ON — the async channel
+    // probe below turns it back off (and locks the toggle) for mono sources.
+    if(!dup){ f._target=cleanName(f.name); f._norm=state.normalize; f._stereo=true; f._srcCh=0; state.files.push(f); probeFileChannels(f); }
   }
   renderQueue();
   if(good.length) log(`${good.length} file(s) queued for upload — rename below if needed${bad.length?` — ignored ${bad.length} unsupported (${bad.map(f=>f.name).join(", ")})`:""}.`);
@@ -100,6 +109,36 @@ function refreshDupeMarks(){
   }
   setControls();
 }
+// Channel probe for a queued file: audio decodes natively, video only demuxes
+// (see probeChannels). Resolves after render — the toggle and the source note
+// are painted in place so a rename input being edited never loses focus.
+async function probeFileChannels(f){
+  const ch=await probeChannels(f);
+  const i=state.files.indexOf(f);
+  if(i<0) return; // removed from the queue while probing
+  f._srcCh=ch;
+  if(ch===1) f._stereo=false; // mono source: stereo would be dual mono for 2× slot memory
+  paintStereoState(i);
+}
+function paintStereoState(i){
+  const f=state.files[i]; if(!f) return;
+  const rows=$("#queue").querySelectorAll(".file");
+  const row=rows[i]; if(!row) return;
+  const tS=row.querySelector(".tog.st");
+  if(tS){
+    const mono=f._srcCh===1;
+    tS.classList.toggle("on",!!f._stereo);
+    tS.disabled=state.busy||mono;
+    tS.title=mono?"Source file is mono — stereo upload disabled":"Upload as stereo — the device splits L/R itself";
+  }
+  // Name the source on the meta line — touch screens have no hover for the
+  // title above. Skipped while busy, when the line shows transfer progress.
+  if(!state.busy&&f._srcCh>0){
+    const meta=$("#file-meta-"+i);
+    if(meta&&meta.textContent.indexOf(" source")<0)
+      meta.textContent+=f._srcCh===1?" · mono source":" · stereo source";
+  }
+}
 function renderQueue(){
   const q=$("#queue");q.innerHTML="";
   const dupes=queueDupes();
@@ -107,7 +146,7 @@ function renderQueue(){
     const video=isVideoFile(f);
     const d=document.createElement("div");d.className="file";
     d.innerHTML=`<div><input class="rename${dupes[i]?" dup":""}" id="file-name-${i}" type="text" maxlength="31" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Sample name on the device"><div class="meta" id="file-meta-${i}">${formatBytes(f.size)} · ${video?"audio track will be extracted":"waiting"}</div><div class="rename-hint">from ${escapeHtml(f.name)}${dupes[i]?" · <b>duplicate name</b>":""}</div><div class="ptrack"><div class="pfill" id="file-bar-${i}"></div></div></div>
-      <div class="ftoggles"><button type="button" class="tog norm${f._norm?" on":""}" title="Peak-normalize this sample to 0 dB">NORM</button><button type="button" class="tog st${f._stereo?" on":""}" title="Upload as stereo — the device splits L/R itself">STEREO</button></div>
+      <div class="ftoggles"><button type="button" class="tog norm${f._norm?" on":""}" title="Peak-normalize this sample to 0 dB">NORM</button><button type="button" class="tog st${f._stereo?" on":""}"${f._srcCh===1?" disabled":""} title="${f._srcCh===1?"Source file is mono — stereo upload disabled":"Upload as stereo — the device splits L/R itself"}">STEREO</button></div>
       <button class="queue-x" title="Remove from queue" aria-label="Remove from queue">×</button>`;
     const inp=d.querySelector("input");
     inp.value=targetNameFor(f);

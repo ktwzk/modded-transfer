@@ -25,7 +25,14 @@ session-only, not persisted): peak-normalize to 0.99 with one gain over all
 channels when `_norm` (gain logged as `normGain`). `state.normalize`
 (`mt.normalize`, Normalize checkbox in step 3) is the default for newly queued
 files AND a master switch — flipping it sets `_norm` on every queued row
-(`main.js` re-renders). The STEREO header byte (`h[1]=1`, `size=frames*4`)
+(`main.js` re-renders). `_stereo` defaults to ON; the async channel probe
+(`probeChannels` in `audio.js` — native decode for audio, demux-only for
+video, buffer discarded, 0 on failure) records `_srcCh` per file, and a mono
+source forces `_stereo=false` + disables its STEREO toggle (`probeFileChannels`/
+`paintStereoState` update the row in place, no re-render, so rename focus is
+kept; `setControls()` keeps mono rows disabled while re-enabling the rest when
+idle; the meta line gains a `· mono/stereo source` note for touch screens).
+The STEREO header byte (`h[1]=1`, `size=frames*4`)
 relies on the Model-TG firmware's `el_deint` to split L/R into mid/side planes
 itself (confirmed in TinyGregAudio/Model-TG source; costs 2× slot memory).
 The converted buffer is uploaded (audition was removed in v23 — the modded Cycles
@@ -127,7 +134,7 @@ survives as a comment. Nothing in the app phones home — verify with
 that step), `mt.probe.ok.*`, `mt.sendfmt`, `mt.transport`, `mt.deadfmt.arr`,
 `mt.deadfmt.u8`, `mt.warmup`, `mt.verify`, `mt.normalize`, `mt.theme`.
 
-## Code structure (v25: `index.html` + `css/` + `js/`)
+## Code structure (v26: `index.html` + `css/` + `js/`)
 `index.html` — markup only (+ tiny theme-init inline script, `mt.theme` with
 `tg.theme` fallback for v19 users).
 `css/site.css` — page chrome (tokens, base, header, hero, footer);
@@ -147,10 +154,12 @@ makeDir — all device ops wrapped in `withBusy`, delete/mkdir recorded via
 `rep()`) → `queue` (`setControls`,
 media types, rename `_target`/`targetNameFor`/`queueDupes`/`refreshDupeMarks`,
 renderQueue with per-row `.pfill` bar + NORM/STEREO `.tog` buttons (`_norm`/
-`_stereo` expandos, busy-disabled in `setControls`)) → `video`
+`_stereo`/`_srcCh` expandos, mono-aware busy-disable in `setControls`,
+`probeFileChannels`/`paintStereoState` in-place probe painting)) → `video`
 (MP4/MOV demuxer, WebCodecs, capture) → `audio`
 (`decodeTo48k` with per-sample `{stereo,normalize}` opts, returns
-`channels` + `normGain`; `buildHeader` takes the stereo flag) → `transfer` (ping, upload with throttled
+`channels` + `normGain`; `probeChannels` for source channel count;
+`buildHeader` takes the stereo flag) → `transfer` (ping, upload with throttled
 progress UI (global `#bar` + per-row `#file-bar-N`), optional post-CLOSE
 verify via `state.verify`, per-file norm/stereo counts in the `upload-all start`
 report line, `uploadAll`) → `main` (bindings
@@ -254,3 +263,8 @@ was deliberately skipped — it works, don't touch).
   Normalize checkbox is now a master switch (sets all queued rows + stays the
   default for new files); per-file norm/stereo counts in the `upload-all
   start` report line
+- v26: stereo is the default (`_stereo=true` at queue time) + source channel
+  detection (`probeChannels`: audio via native decode, video via demux-only
+  channel count) — mono sources are forced to mono with the STEREO toggle
+  disabled; the probe paints rows in place (`probeFileChannels`/
+  `paintStereoState`), `setControls()` keeps mono rows locked when idle

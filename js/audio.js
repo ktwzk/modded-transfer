@@ -25,6 +25,20 @@ async function decodeAudioFile(file){
   }finally{ try{await ac.close()}catch{} }
   return buf;
 }
+// Channel probe for the per-sample STEREO toggle: how many source channels
+// does this file have? Audio files decode natively (fast, the buffer is
+// discarded); video files only demux (box walk, no audio decode). Returns
+// the channel count, 0 when it could not be determined.
+async function probeChannels(file){
+  try{
+    if(isVideoFile(file)){
+      const dm=await demuxAudio(file);
+      return (dm&&dm.channels)|0;
+    }
+    const buf=await decodeAudioFile(file);
+    return buf?(buf.numberOfChannels|0):0;
+  }catch(_){ return 0; }
+}
 async function decodeTo48k(file,opts,onProgress){
   const stereo=!!(opts&&opts.stereo);
   const normalize=!!(opts&&opts.normalize);
