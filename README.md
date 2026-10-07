@@ -17,3 +17,35 @@ somewhere else — any browser with Web MIDI should do.
 Design is poorly stolen from [Modded-Cycles](https://18nelli18.github.io/Modded-Cycles/) —
 also I recommend his flasher and truly appreciate his work. If you've found
 this sample uploader useful, tip to [18nelli18's Ko-Fi](https://ko-fi.com/18nelli).
+
+## Quick start
+
+1. On the Cycles: **Device Config → Transfer → SMP** (after a power cycle it
+   returns to CYC — set SMP again). In Web MIDI Browser's Device Config make
+   sure SysEx is enabled.
+2. Open this page in Web MIDI Browser, tap **Connect**, pick the output +
+   input ports.
+3. Choose audio, rename each sample (that name is what lands on the device),
+   tap **Upload**.
+4. If the app ever closes the moment you send something: reopen, Connect,
+   run **Probe** — it retests the send path and remembers what crashed.
+
+## Supported formats
+
+WAV · MP3 · M4A · AAC · OGG · AIFF · FLAC · MP4 · MOV. Everything is
+converted on the page to 48 kHz mono 16-bit; MP4/MOV contribute only their
+audio track (there is a separate picker that opens Apple Photos on
+iPad/iPhone).
+
+## Troubleshooting
+
+- No MIDI ports at all — SysEx is probably disabled in the Web MIDI
+  Browser app's Device Config.
+- The app closes on send — that's the native bridge, not the page: reopen,
+  Connect, Probe; it marks the crashing format dead and uses the other one.
+- "Not 48kHz mono" on the device for an uploaded sample — tell me; the page
+  may need a byte-order flip (`WIRE_LE` in `js/core.js`).
+
+## License
+
+WTFPL — do what the fuck you want to (see LICENSE).
