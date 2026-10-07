@@ -23,8 +23,8 @@ this sample uploader useful, tip 18nelli18 on [Ko-fi](https://ko-fi.com/18nelli)
 1. On the Cycles: **Device Config → Transfer → SMP** (after a power cycle it
    returns to CYC — set SMP again). In Web MIDI Browser's Device Config make
    sure SysEx is enabled.
-2. Open this page in Web MIDI Browser, tap **Connect**, pick the output +
-   input ports.
+2. Open [https://ktwzk.github.io/modded-transfer/](https://ktwzk.github.io/modded-transfer/)
+   in Web MIDI Browser, tap **Connect**, pick the output + input ports.
 3. Choose audio, rename each sample (that name is what lands on the device),
    tap **Upload**.
 4. If the app ever closes the moment you send something: reopen, Connect,
