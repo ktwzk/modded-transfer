@@ -1,12 +1,12 @@
 # ModdedTransfer
 
 I had a problem: I needed to upload samples to my modded Model:Cycles from
-my iPad via a USB cable, and there was no tool for that — so this page is my
+my iPad via a USB cable, and there was no tool for that — so [this page](https://ktwzk.github.io/modded-transfer/) is my
 workaround for it.
 
 For this to work you'll need [Web MIDI Browser](https://apps.apple.com/us/app/web-midi-browser/id953846217)
 by that guy — Takashi Mizuhiki ([mizuhiki/WebMIDIAPIShimForiOS](https://github.com/mizuhiki/WebMIDIAPIShimForiOS)).
-Open this page in his app, plug the iPad into the Cycles, upload.
+Open [this page](https://ktwzk.github.io/modded-transfer/) in his app, plug the iPad into the Cycles, upload.
 
 Honest disclaimer: it's pure AI slop, no code was written by a human. It's
 tested with Modded-Cycles 1.21 on my Model:Cycles and iPad mini 6 though.
