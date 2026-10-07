@@ -60,7 +60,7 @@ select{appearance:none;-webkit-appearance:none;padding-right:30px;
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lcd .ok{color:#7de39a}:root:not([data-theme="light"]) .lcd .bad{color:#ff9b8d}}
 :root[data-theme="dark"] .lcd .ok{color:#7de39a}
 :root[data-theme="dark"] .lcd .bad{color:#ff9b8d}
-#status{min-height:3.6em;max-height:13em;overflow:auto}
+#status{height:calc(4 * 1.42em + 16px);overflow-y:auto}
 #probeinfo{margin-top:10px;font-size:12.5px}
 #probeinfo .okmark{color:var(--ok)}
 #probeinfo .bad{color:var(--bad)}
