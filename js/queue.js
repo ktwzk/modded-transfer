@@ -124,11 +124,13 @@ function paintStereoState(i){
   const f=state.files[i]; if(!f) return;
   const rows=$("#queue").querySelectorAll(".file");
   const row=rows[i]; if(!row) return;
-  const tS=row.querySelector(".tog.st");
+  const tM=row.querySelector(".tog.mono"), tS=row.querySelector(".tog.st");
   if(tS){
     const mono=f._srcCh===1;
     tS.classList.toggle("on",!!f._stereo);
+    tM.classList.toggle("on",!f._stereo);
     tS.disabled=state.busy||mono;
+    tM.disabled=state.busy;
     tS.title=mono?"Source file is mono — stereo upload disabled":"Upload as stereo — the device splits L/R itself";
   }
   // Name the source on the meta line — touch screens have no hover for the
@@ -146,16 +148,16 @@ function renderQueue(){
     const video=isVideoFile(f);
     const d=document.createElement("div");d.className="file";
     d.innerHTML=`<div><input class="rename${dupes[i]?" dup":""}" id="file-name-${i}" type="text" maxlength="31" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Sample name on the device"><div class="meta" id="file-meta-${i}">${formatBytes(f.size)} · ${video?"audio track will be extracted":"waiting"}</div><div class="rename-hint">from ${escapeHtml(f.name)}${dupes[i]?" · <b>duplicate name</b>":""}</div><div class="ptrack"><div class="pfill" id="file-bar-${i}"></div></div></div>
-      <div class="ftoggles"><button type="button" class="tog norm${f._norm?" on":""}" title="Peak-normalize this sample to 0 dB">NORM</button><button type="button" class="tog st${f._stereo?" on":""}"${f._srcCh===1?" disabled":""} title="${f._srcCh===1?"Source file is mono — stereo upload disabled":"Upload as stereo — the device splits L/R itself"}">STEREO</button></div>
-      <button class="queue-x" title="Remove from queue" aria-label="Remove from queue">×</button>`;
+      <div class="ftoggles"><button type="button" class="tog norm${f._norm?" on":""}" title="Peak-normalize this sample to 0 dB">NORMALIZE to 0dB</button><div class="seg"><button type="button" class="tog mono${f._stereo?"":" on"}">MONO</button><button type="button" class="tog st${f._stereo?" on":""}"${f._srcCh===1?" disabled":""} title="${f._srcCh===1?"Source file is mono — stereo upload disabled":"Upload as stereo — the device splits L/R itself"}">STEREO</button></div><button class="queue-x" title="Remove from queue" aria-label="Remove from queue">×</button></div>`;
     const inp=d.querySelector("input");
     inp.value=targetNameFor(f);
     inp.addEventListener("input",()=>{ f._target=inp.value; refreshDupeMarks(); });
     inp.addEventListener("change",()=>{ f._target=sanitizeTarget(inp.value)||cleanName(f.name); inp.value=targetNameFor(f); refreshDupeMarks(); });
     // Toggles flip the per-sample flag in place — no re-render, focus is untouched.
-    const tN=d.querySelector(".tog.norm"), tS=d.querySelector(".tog.st");
+    const tN=d.querySelector(".tog.norm"), tM=d.querySelector(".tog.mono"), tS=d.querySelector(".tog.st");
     tN.onclick=()=>{ f._norm=!f._norm; tN.classList.toggle("on",!!f._norm); };
-    tS.onclick=()=>{ f._stereo=!f._stereo; tS.classList.toggle("on",!!f._stereo); };
+    tM.onclick=()=>{ f._stereo=false; tM.classList.add("on"); tS.classList.remove("on"); };
+    tS.onclick=()=>{ f._stereo=true; tS.classList.add("on"); tM.classList.remove("on"); };
     d.querySelector(".queue-x").onclick=()=>{ state.files.splice(i,1); renderQueue(); };
     q.appendChild(d);
   });

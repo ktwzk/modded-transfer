@@ -23,15 +23,6 @@ if(!window.__MODDED_TRANSFER) throw new Error("js/core.js must load before js/ma
   state.verify=$("#opt-verify").checked;
   lsSet("mt.verify", state.verify?"1":"0");
 });
- $("#opt-normalize").addEventListener("change",()=>{
-  state.normalize=$("#opt-normalize").checked;
-  lsSet("mt.normalize", state.normalize?"1":"0");
-  // Master switch: applies to every queued sample at once (and stays the
-  // default for files added later); per-sample NORM buttons can still
-  // override individual rows afterwards.
-  for(let i=0;i<state.files.length;i++) state.files[i]._norm=state.normalize;
-  renderQueue();
-});
  $("#copyrep").onclick=copyReport;
 // One picker button everywhere — no drop zones (drag & drop lives in the
 // official transfer app). iOS shows its own Photo Library / Take Video /
@@ -71,7 +62,6 @@ else $("#device").textContent="This browser does not expose Web MIDI.";
 migrateLs();
 if(lsGet("mt.warmup")==="0"){ $("#opt-warmup").checked=false; }
 if(lsGet("mt.verify")==="0"){ state.verify=false; $("#opt-verify").checked=false; }
-if(lsGet("mt.normalize")==="1"){ state.normalize=true; $("#opt-normalize").checked=true; }
 setControls();
   rep("session start · ModdedTransfer v26 · "+(navigator.userAgent||"n/a"));
 
